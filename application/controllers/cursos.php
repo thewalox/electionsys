@@ -138,9 +138,9 @@ class Cursos extends CI_controller
 		if (isset($_GET['term'])) {
 			
 			foreach ($datos as $dato) {
-				$new_row['label']=htmlentities(stripslashes($dato['nombre']));
-				$new_row['value']=htmlentities(stripslashes($dato['idempleado']));
-				$new_row['dpto']=htmlentities(stripslashes($dato['desc_departamento']));
+				$new_row['label']=htmlentities(stripslashes($dato['desc_curso']));
+				$new_row['value']=htmlentities(stripslashes($dato['idcurso']));
+				//$new_row['dpto']=htmlentities(stripslashes($dato['desc_departamento']));
 				$row_set[] = $new_row; //build an array
 			}
 		

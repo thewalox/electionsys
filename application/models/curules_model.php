@@ -9,9 +9,10 @@ class Curules_model extends CI_Model
 		parent::__construct();
 	}
 
-	public function add_curso($codigo, $desc){
-		$sql = "INSERT INTO cursos (idcurso, desc_curso, estado)
-				VALUES (UPPER(". $this->db->escape($codigo) ."), UPPER(". $this->db->escape($desc) ."), 'A')";
+	public function add_curul($codigo, $desc, $tipo){
+		$sql = "INSERT INTO curules (idcurul, desc_curul, tipo_curul, estado)
+				VALUES (UPPER(". $this->db->escape($codigo) ."), UPPER(". $this->db->escape($desc) .
+				"), ". $this->db->escape($tipo) .", 'A')";
 		//echo $sql;
 		if ($this->db->simple_query($sql)){
         	return true;
@@ -21,9 +22,10 @@ class Curules_model extends CI_Model
 		
 	}
 
-	public function edit_curso($codigo, $desc){
-		$sql = "UPDATE cursos SET desc_curso = UPPER(". $this->db->escape($desc) .")
-				WHERE idcurso = '$codigo'";
+	public function edit_curul($codigo, $desc, $tipo){
+		$sql = "UPDATE curules SET desc_curul = UPPER(". $this->db->escape($desc) ."),
+				tipo_curul = ". $this->db->escape($tipo) ."
+				WHERE idcurul = '$codigo'";
 		//echo($sql);
 		if ($this->db->simple_query($sql)){
         	return true;
@@ -45,11 +47,12 @@ class Curules_model extends CI_Model
 		
 	}
 
-	public function get_cursos($limit, $segmento){
-		$sql = "SELECT *
-				FROM cursos
+	public function get_curules($limit, $segmento){
+		$sql = "SELECT idcurul, desc_curul, 
+				CASE WHEN tipo_curul = 'G' THEN 'GLOBAL' ELSE 'PRIVADO' END AS tipo_curul
+				FROM curules
 				WHERE estado = 'A'
-				ORDER BY idcurso ";
+				ORDER BY idcurul ";
 
 		if($limit != 0){
 			$sql .= "LIMIT ". $segmento ." , ". $limit;
@@ -62,14 +65,14 @@ class Curules_model extends CI_Model
 		
 	}
 
-	function get_total_cursos(){
-		$this->db->from('cursos')->where('estado','A');
+	function get_total_curules(){
+		$this->db->from('curules')->where('estado','A');
 		return $this->db->count_all_results();
   	}
 
-  	public function get_curso_by_id($id){
+  	public function get_curul_by_id($id){
   		
-  		$sql = "SELECT * FROM cursos where idcurso = '$id' and estado = 'A'";
+  		$sql = "SELECT * FROM curules where idcurul = '$id' and estado = 'A'";
   				
 		//echo($sql);
 		$res = $this->db->query($sql);
@@ -77,12 +80,13 @@ class Curules_model extends CI_Model
 		
 	}
 
-	public function get_cursos_by_criterio($filtro){
-		$sql = "SELECT *
-				FROM cursos
-				WHERE (idcurso LIKE '%". $filtro ."%'
-				OR desc_curso like '%". $filtro ."%') 
-				ORDER BY idcurso";
+	public function get_curules_by_criterio($filtro){
+		$sql = "SELECT idcurul, desc_curul, 
+				CASE WHEN tipo_curul = 'G' THEN 'GLOBAL' ELSE 'PRIVADO' END AS tipo_curul
+				FROM curules
+				WHERE estado = 'A' AND (idcurul LIKE '%". $filtro ."%'
+				OR desc_curul like '%". $filtro ."%') 
+				ORDER BY idcurul ";
 				//echo($sql);
 		$res = $this->db->query($sql);
 		return $res->result_array();

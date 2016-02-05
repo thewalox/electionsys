@@ -89,6 +89,8 @@
 		                                <li class="menu-item "><a href="<?php echo base_url(); ?>estudiantes/form_crear">Crear Estudiante</a></li>
 		                                <li role="separator" class="divider"></li>
 		                                <li class="menu-item "><a href="<?php echo base_url(); ?>estudiantes/form_buscar">Editar Estudiantes</a></li>
+		                                <li role="separator" class="divider"></li>
+		                                <li class="menu-item "><a href="<?php echo base_url(); ?>estudiantes/form_importar">Importar Estudiantes</a></li>
 		                            </ul>
 	                        	</li>
 	                        	<li role="separator" class="divider"></li>

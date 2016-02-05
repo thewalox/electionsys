@@ -80,7 +80,7 @@ class Cursos_model extends CI_Model
 	public function get_cursos_by_criterio($filtro){
 		$sql = "SELECT *
 				FROM cursos
-				WHERE (idcurso LIKE '%". $filtro ."%'
+				WHERE estado = 'A' AND (idcurso LIKE '%". $filtro ."%'
 				OR desc_curso like '%". $filtro ."%') 
 				ORDER BY idcurso";
 				//echo($sql);

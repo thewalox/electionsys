@@ -26,15 +26,17 @@ class Curules extends CI_controller
 		
 	}
 
-	function crear_curso(){
+	function crear_curul(){
 
 		$this->form_validation->set_rules('codigo', 'Codigo', 'required');
 		$this->form_validation->set_rules('descripcion', 'Descripcion', 'required');
+		$this->form_validation->set_rules('tipo', 'Tipo de Curul', 'required|callback_check_default');
 
 		$this->form_validation->set_message('required','El campo %s es obligatorio');
+		$this->form_validation->set_message('check_default','Seleccione un valor para el campo %s');
 
 	    if($this->form_validation->run()!=false){
-			$datos["mensaje"] = $this->Cursos_model->add_curso($this->input->post("codigo"), $this->input->post("descripcion"));
+			$datos["mensaje"] = $this->Curules_model->add_curul($this->input->post("codigo"), $this->input->post("descripcion"), $this->input->post("tipo"));
 		}else{
 			$datos["mensaje"] = validation_errors(); //incorrecto
 		}
@@ -51,8 +53,8 @@ class Curules extends CI_controller
 			$this->load->library('pagination');
 
 			/*Se personaliza la paginación para que se adapte a bootstrap*/
-			$config['base_url'] = base_url().'cursos/form_buscar/';
-			$config['total_rows'] = $this->Cursos_model->get_total_cursos();
+			$config['base_url'] = base_url().'curules/form_buscar/';
+			$config['total_rows'] = $this->Curules_model->get_total_curules();
 			$config['per_page'] = 10;
 			$desde = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;
 		    $config['cur_tag_open'] = '<li class="active"><a href="#">';
@@ -70,12 +72,12 @@ class Curules extends CI_controller
 
 			$datos["titulo"] = " .: ElectionSys :.";
 
-			$datos["cursos"] = $this->Cursos_model->get_cursos($config['per_page'], $desde);
+			$datos["curules"] = $this->Curules_model->get_curules($config['per_page'], $desde);
 
 			$this->pagination->initialize($config);
 
 		    $this->load->view("header", $datos);
-		    $this->load->view("cursos/buscar_cursos", $datos);
+		    $this->load->view("curules/buscar_curules", $datos);
 		    $this->load->view("footer", $datos);
 		    $this->load->view("fin", $datos);
 		}
@@ -89,24 +91,26 @@ class Curules extends CI_controller
 		}else{
 			$datos["titulo"] = " .: ElectionSys :.";
 
-			$datos["curso"] = $this->Cursos_model->get_curso_by_id($id);
+			$datos["curul"] = $this->Curules_model->get_curul_by_id($id);
 			
 		    $this->load->view("header", $datos);
-		    $this->load->view("cursos/editar_curso", $datos);
+		    $this->load->view("curules/editar_curul", $datos);
 		    $this->load->view("footer", $datos);
 		    $this->load->view("fin", $datos);
 		}
 		
 	}
 
-	function editar_curso(){
+	function editar_curul(){
 
 		$this->form_validation->set_rules('descripcion', 'Descripcion', 'required');
+		$this->form_validation->set_rules('tipo', 'Tipo de Curul', 'required|callback_check_default');
 
 		$this->form_validation->set_message('required','El campo %s es obligatorio');
+		$this->form_validation->set_message('check_default','Seleccione un valor para el campo %s');
 
 	    if($this->form_validation->run()!=false){
-			$datos["mensaje"] = $this->Cursos_model->edit_curso($this->input->post("codigo"), $this->input->post("descripcion"));
+			$datos["mensaje"] = $this->Curules_model->edit_curul($this->input->post("codigo"), $this->input->post("descripcion"), $this->input->post("tipo"));
 		}else{
 			$datos["mensaje"] = validation_errors(); //incorrecto
 		}
@@ -123,7 +127,7 @@ class Curules extends CI_controller
 		redirect('cursos/form_buscar');
 	}
 
-	function get_cursos_criterio(){
+	function get_curules_criterio(){
 
 		//se valida la variable get term para las busquedas que se realizan a traves de jquey UI
 
@@ -133,7 +137,7 @@ class Curules extends CI_controller
 			$filtro = $this->input->get("filtro");
 		}
 
-		$datos = $this->Cursos_model->get_cursos_by_criterio($filtro);
+		$datos = $this->Curules_model->get_curules_by_criterio($filtro);
 
 		if (isset($_GET['term'])) {
 			
@@ -153,22 +157,6 @@ class Curules extends CI_controller
 
 	}
 
-	function form_ver($id){
-
-		if (!$this->session->userdata('sess_id_user')) {
-		   	redirect("login");
-		}else{
-			$datos["titulo"] = " .: ElectionSys :.";
-
-			$datos["eleccion"] = $this->Elecciones_model->get_eleccion_by_id($id, 0);
-			
-		    $this->load->view("header", $datos);
-		    $this->load->view("elecciones/ver_eleccion", $datos);
-		    $this->load->view("footer", $datos);
-		    $this->load->view("fin", $datos);
-		}
-		
-	}
 
 	function check_default($valor_post){
 		if($valor_post == '0'){ 

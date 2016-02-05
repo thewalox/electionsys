@@ -5,7 +5,7 @@
 					<ol class="breadcrumb">
 						<li><a href="<?php echo base_url(); ?>">Inicio</a></li>
 						<li><a href="#">Elecciones</a></li>
-						<li class="active">Editar Eleccion</li>
+						<li class="active">Ver Eleccion</li>
 					</ol>
 				</div>
 				

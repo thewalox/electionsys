@@ -5,10 +5,13 @@
 					<ol class="breadcrumb">
 						<li><a href="<?php echo base_url(); ?>">Inicio</a></li>
 						<li><a href="#">Curules</a></li>
-						<li class="active">Crear Curules</li>
+						<li class="active">Editar Curul</li>
 					</ol>
 				</div>
 				
+				<?php
+				if (!empty($curul)) {
+				?>
 				<form name="form">
 					<div class="form-group" id="content"></div>
 
@@ -18,18 +21,18 @@
 					  		<div class="row">
 					  			<div class="form-group col-md-2">
 									<label for="codigo">Codigo</label>
-									<input type="text" placeholder="Codigo Curul" id="codigo" name="codigo" class="form-control input-sm">
+									<input type="text" placeholder="Codigo Curul" id="codigo" name="codigo" value="<?php echo $curul->idcurul; ?>" class="form-control input-sm" disabled>
 								</div>
 								<div class="form-group col-md-8">
 									<label for="descripcion">Descripcion</label>
-									<input type="text" placeholder="Descripcion" id="descripcion" name="descripcion" class="form-control input-sm">
+									<input type="text" placeholder="Descripcion" id="descripcion" name="descripcion" value="<?php echo $curul->desc_curul; ?>" class="form-control input-sm">
 								</div>
 								<div class="form-group col-md-2">
 									<label for="tipo">Tipo</label>
 									<select class="form-control input-sm" id="tipo" name="tipo">
 										<option value="0">Seleccione Tipo</option>
-										<option value="G">Global</option>
-										<option value="P">Privado</option>
+										<option value="G" <?php if($curul->tipo_curul == 'G'){ ?> selected="selected" <?php } ?>>Global</option>
+										<option value="P" <?php if($curul->tipo_curul == 'P'){ ?> selected="selected" <?php } ?>>Privado</option>
 									</select>
 								</div>
 					  		</div>
@@ -37,11 +40,19 @@
 							<div class="row" align="center">
 								<div class="col-md-12">
 									<input type="button" name="aceptar" id="aceptar" value="Aceptar" class="btn btn-primary">
+									<input type="button" name="cancelar" id="cancelar" value="Regresar" class="btn btn-success" onclick="javascript:location.href = '<?php echo base_url().'curules/form_buscar'; ?>';">
 								</div>
 					  		</div>
 						</div>
 					</div>
 				</form>
+				<?php
+				}else{
+				?>	
+					<div class='alert alert-danger text-center' role='alert'>No existe curul con este criterio de busqueda.</div>
+				<?php
+				}
+				?>
 			</section>
 
 		</div>
@@ -57,7 +68,7 @@
 
 			    $.ajax({
 			    	type:"POST",
-			    	url:"<?php echo base_url('curules/crear_curul'); ?>",
+			    	url:"<?php echo base_url('curules/editar_curul'); ?>",
 			    	data:{
 			    		'codigo'		: 	codigo,
 			    		'descripcion'	: 	descripcion,
@@ -71,12 +82,9 @@
 						
 						
 						if (json.mensaje == true) {
-							html += "<div class='alert alert-success' role='alert'>Curul creada Exitosamente!!!!!</div>";
-							$("#codigo").val("");
-							$("#descripcion").val("");
-							$("#tipo").val("0");
+							html += "<div class='alert alert-success' role='alert'>Curul modificada Exitosamente!!!!!</div>";
 						}else if(json.mensaje == false){
-								html += "<div class='alert alert-danger' role='alert'>Ah ocurrido un error al intentar crear esta curul. Por favor revise la informacion o comuniquese con el administrador del sistema</div>";
+								html += "<div class='alert alert-danger' role='alert'>Ah ocurrido un error al intentar modificar esta curul. Por favor revise la informacion o comuniquese con el administrador del sistema</div>";
 						}else{
 								html += "<div class='alert alert-danger' role='alert'>" + json.mensaje + "</div>";
 						}
