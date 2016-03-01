@@ -9,11 +9,11 @@ class Candidatos_model extends CI_Model
 		parent::__construct();
 	}
 
-	public function add_estudiante($codigo, $nombre, $curso, $tel, $estado, $sexo){
-		$sql = "INSERT INTO Candidatos (idestudiante, nombre_completo, sexo, telefono, idcurso, estado)
-				VALUES (". $this->db->escape($codigo) .", UPPER(". $this->db->escape($nombre) .
-				"), ". $this->db->escape($sexo) .", ". $this->db->escape($tel) .
-				", UPPER(". $this->db->escape($curso) ."), ". $this->db->escape($estado) .")";
+	public function add_candidato($codele, $codcan, $codcur, $codcurul, $numelec, $imagen){
+		$sql = "INSERT INTO candidatos (ideleccion, idcandidato, idcurso, idcurul, numero_electoral, foto, estado)
+				VALUES (". $this->db->escape($codele) .", ". $this->db->escape($codcan) .", 
+				". $this->db->escape($codcur) .", ". $this->db->escape($codcurul) .", 
+				". $this->db->escape($numelec) .", '". $imagen ."', 'A')";
 		//echo $sql;
 		if ($this->db->simple_query($sql)){
         	return true;

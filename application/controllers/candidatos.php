@@ -26,19 +26,27 @@ class Candidatos extends CI_controller
 		
 	}
 
-	function crear_estudiante(){
-
-		$this->form_validation->set_rules('codigo', 'Codigo', 'required');
-		$this->form_validation->set_rules('nombre', 'Nombre', 'required');
-		$this->form_validation->set_rules('curso', 'Curso', 'required');
-		$this->form_validation->set_rules('estado', 'Estado', 'required|callback_check_default');
-		$this->form_validation->set_rules('sexo', 'Sexo', 'required|callback_check_default');
+	function crear_candidato(){
+		
+		$this->form_validation->set_rules('codele', 'Codigo de Eleccion', 'required');
+		$this->form_validation->set_rules('codcan', 'Codigo de Candidato', 'required');
+		$this->form_validation->set_rules('codcur', 'Codigo de Curso', 'required');
+		$this->form_validation->set_rules('codcurul', 'Codigo de Curul', 'required');
+		$this->form_validation->set_rules('numelec', 'Numero Electoral', 'required');
+		
+		if (empty($_FILES['file']['name'])){
+    		$this->form_validation->set_rules('file', 'Foto', 'required');
+		}
 
 		$this->form_validation->set_message('required','El campo %s es obligatorio');
-		$this->form_validation->set_message('check_default','Seleccione un valor para el campo %s');
 
 	    if($this->form_validation->run()!=false){
-			$datos["mensaje"] = $this->Candidatos_model->add_estudiante($this->input->post("codigo"), $this->input->post("nombre"), $this->input->post("curso"),$this->input->post("tel"), $this->input->post("estado"), $this->input->post("sexo"));
+	    	//Nombre de la foto
+			$nombreArchivo = $_FILES['file']['name'];
+	    	//convierte a binario
+	    	$imagenBinaria = addslashes(file_get_contents($_FILES['file']['tmp_name']));
+
+			$datos["mensaje"] = $this->Candidatos_model->add_candidato($this->input->post("codele"), $this->input->post("codcan"), $this->input->post("codcur"),$this->input->post("codcurul"), $this->input->post("numelec"), $imagenBinaria);
 		}else{
 			$datos["mensaje"] = validation_errors(); //incorrecto
 		}

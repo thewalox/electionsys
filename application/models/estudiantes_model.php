@@ -84,12 +84,13 @@ class Estudiantes_model extends CI_Model
 	}
 
 	public function get_estudiantes_by_criterio($filtro){
-		$sql = "SELECT *
-				FROM estudiantes
-				WHERE (idestudiante LIKE '%". $filtro ."%'
-				OR nombre_completo like '%". $filtro ."%'
-				OR idcurso like '%". $filtro ."%')
-				ORDER BY idestudiante ";
+		$sql = "SELECT e.idestudiante, e.nombre_completo, e.sexo, e.telefono, e.idcurso, c.desc_curso, e.estado
+				FROM estudiantes e
+				INNER JOIN cursos c ON c.idcurso = e.idcurso
+				WHERE (e.idestudiante LIKE '%". $filtro ."%'
+				OR e.nombre_completo like '%". $filtro ."%'
+				OR e.idcurso like '%". $filtro ."%')
+				ORDER BY e.idestudiante ";
 				//echo($sql);
 		$res = $this->db->query($sql);
 		return $res->result_array();
