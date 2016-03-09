@@ -5,67 +5,68 @@
 					<ol class="breadcrumb">
 						<li><a href="<?php echo base_url(); ?>">Inicio</a></li>
 						<li><a href="<?php echo base_url(); ?>candidatos/form_buscar/">Candidatos</a></li>
-						<li class="active">Crear Candidatos</li>
+						<li class="active">Editar Candidatos</li>
 					</ol>
 				</div>
 				
 				<?php
+				if (!empty($candidato)) {
 					$atributos = array('id' => 'form-candidatos');
-					echo form_open_multipart(base_url()."candidatos/crear_candidato", $atributos);
+					echo form_open_multipart(base_url()."candidatos/editar_candidato", $atributos);
 				?>
 					<div class="form-group" id="content"></div>
 
 					<div class="panel panel-primary">
-						<div class="panel-heading">Nuevo Candidato</div>
+						<div class="panel-heading">Editar Candidato</div>
 					  	<div class="panel-body">
 					  		<div class="row">
 								<div class="form-group col-md-3">
 									<label for="desceleccion">Foto Candidato</label>
 									<output id="foto">
-										<img src="<?php echo base_url(); ?>/assets/img/nuevo_usuario.jpg" class="img-thumbnail">
+										<img src="data:image/jpeg;base64,<?php echo base64_encode($candidato->foto); ?>" class="img-thumbnail">
 									</output>
 								</div>
 								<div class="form-group col-md-9">
 									<div class="row">
 										<div class="form-group col-md-2 ui-widget">
 											<label for="codele">Eleccion</label>
-											<input type="text" placeholder="Codigo Eleccion" id="codele" name="codele" class="form-control input-sm ui-widget">
+											<input type="text" placeholder="Codigo Eleccion" id="codele" name="codele" value="<?php echo $candidato->ideleccion; ?>" class="form-control input-sm ui-widget" readonly>
 										</div>
 										<div class="form-group col-md-10">
 											<label for="descele">Descripcion Eleccion</label>
-											<input type="text" placeholder="Descripcion Eleccion" id="descele" name="descele" class="form-control input-sm" disabled>
+											<input type="text" placeholder="Descripcion Eleccion" id="descele" name="descele" value="<?php echo $candidato->desc_eleccion; ?>" class="form-control input-sm" readonly>
 										</div>
 									</div>
 									<div class="row">
 										<div class="form-group col-md-2 ui-widget">
 											<label for="codcan">Candidato</label>
-											<input type="text" placeholder="Codigo Candidato" id="codcan" name="codcan" class="form-control input-sm">
+											<input type="text" placeholder="Codigo Candidato" id="codcan" name="codcan" value="<?php echo $candidato->idcandidato; ?>" class="form-control input-sm" readonly>
 										</div>
 										<div class="form-group col-md-5">
 											<label for="nombre">Nombre Completo</label>
-											<input type="text" placeholder="Nombre Completo" id="nombre" name="nombre" class="form-control input-sm" disabled>
+											<input type="text" placeholder="Nombre Completo" id="nombre" name="nombre" value="<?php echo $candidato->nombre_completo; ?>" class="form-control input-sm" readonly>
 										</div>
 										<div class="form-group col-md-2">
 											<label for="codcur">Curso</label>
-											<input type="text" placeholder="Codigo Curso" id="codcur" name="codcur" class="form-control input-sm" readonly>
+											<input type="text" placeholder="Codigo Curso" id="codcur" name="codcur" value="<?php echo $candidato->idcurso; ?>" class="form-control input-sm" readonly>
 										</div>
 										<div class="form-group col-md-3">
 											<label for="descur">Descripcion Curso</label>
-											<input type="text" placeholder="Descripcion Curso" id="descur" name="descur" class="form-control input-sm" disabled>
+											<input type="text" placeholder="Descripcion Curso" id="descur" name="descur" value="<?php echo $candidato->desc_curso; ?>" class="form-control input-sm" disabled>
 										</div>
 									</div>
 									<div class="row">
 										<div class="form-group col-md-2">
 											<label for="codcurul">Curul</label>
-											<input type="text" placeholder="Codigo Curul" id="codcurul" name="codcurul" class="form-control input-sm">
+											<input type="text" placeholder="Codigo Curul" id="codcurul" name="codcurul" value="<?php echo $candidato->idcurul; ?>" class="form-control input-sm">
 										</div>
 										<div class="form-group col-md-7">
 											<label for="descurul">Descripcion Curul</label>
-											<input type="text" placeholder="Descripcion Curul" id="descurul" name="descurul" class="form-control input-sm" disabled>
+											<input type="text" placeholder="Descripcion Curul" id="descurul" name="descurul" value="<?php echo $candidato->desc_curul; ?>" class="form-control input-sm" disabled>
 										</div>
 										<div class="form-group col-md-3">
 											<label for="numelec">Numero Electoral</label>
-											<input type="text" placeholder="Numero Electoral" id="numelec" name="numelec" class="form-control input-sm">
+											<input type="text" placeholder="Numero Electoral" id="numelec" name="numelec" value="<?php echo $candidato->numero_electoral; ?>" class="form-control input-sm">
 										</div>
 									</div>
 									<div class="row">
@@ -81,6 +82,7 @@
 									<div class="row" align="center">
 										<div class="col-md-12">
 											<input type="button" name="aceptar" id="aceptar" value="Aceptar" class="btn btn-primary">
+											<input type="button" name="cancelar" id="cancelar" value="Regresar" class="btn btn-success" onclick="javascript:location.href = '<?php echo base_url().'candidatos/form_buscar'; ?>';">
 										</div>
 							  		</div>
 								</div>
@@ -89,6 +91,11 @@
 					</div>
 				<?php
 					echo form_close();
+				}else{
+				?>	
+					<div class='alert alert-danger text-center' role='alert'>No existe candidato con estos criterios de busqueda.</div>
+				<?php
+				}
 				?>
 			</section>
 
@@ -124,25 +131,6 @@
             
             //se ejecuta cuando selecciono la imagen 
             document.getElementById('file').addEventListener('change', cargar_foto, false);
-      
-
-			$( "#codele" ).autocomplete({
-			    source: "<?php echo base_url('elecciones/get_elecciones_criterio'); ?>",
-			    select: function( event, ui ) {
-				   	//completa_nombre_estudiante(ui.item.label, ui.item.dpto);
-				   	$("#descele").val(ui.item.label);
-			   	}
-			});
-
-			$( "#codcan" ).autocomplete({
-			    source: "<?php echo base_url('estudiantes/get_estudiantes_criterio'); ?>",
-			    select: function( event, ui ) {
-				   	//completa_nombre_estudiante(ui.item.label, ui.item.dpto);
-				   	$("#nombre").val(ui.item.label);
-				   	$("#codcur").val(ui.item.idcurso);
-				   	$("#descur").val(ui.item.descurso);
-			   	}
-			});
 
 			$( "#codcurul" ).autocomplete({
 			    source: "<?php echo base_url('curules/get_curules_criterio'); ?>",
@@ -173,8 +161,8 @@
 						
 						
 						if (json.mensaje == true) {
-							html += "<div class='alert alert-success' role='alert'>Candidato creado Exitosamente!!!!!</div>";
-							$("#codele").val("");
+							html += "<div class='alert alert-success' role='alert'>Candidato Actualizado Exitosamente!!!!!</div>";
+							/*$("#codele").val("");
 							$("#descele").val("");
 							$("#codcan").val("");
 							$("#nombre").val("");
@@ -183,11 +171,9 @@
 							$("#codcurul").val("");
 							$("#descurul").val("");
 							$("#numelec").val("");
-							document.getElementById("foto").innerHTML = "<img class='img-thumbnail' src='<?php echo base_url(); ?>assets/img/nuevo_usuario.jpg' />";
-							div = $(this).parent().parent();
-    						div.find('input[type=file]').val('');
+							document.getElementById("foto").innerHTML = "<img class='img-thumbnail' src='<?php echo base_url(); ?>assets/img/nuevo_usuario.jpg' />";*/
 						}else if(json.mensaje == false){
-								html += "<div class='alert alert-danger' role='alert'>Ah ocurrido un error al intentar crear este candidato. Por favor revise la informacion o comuniquese con el administrador del sistema</div>";
+								html += "<div class='alert alert-danger' role='alert'>Ah ocurrido un error al intentar actualizar este candidato. Por favor revise la informacion o comuniquese con el administrador del sistema</div>";
 						}else{
 								html += "<div class='alert alert-danger' role='alert'>" + json.mensaje + "</div>";
 						}

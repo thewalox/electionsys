@@ -83,7 +83,7 @@ class Elecciones extends CI_controller
 		
 	}
 
-	function form_editar($id){
+	function form_editar($id = null){
 
 		if (!$this->session->userdata('sess_id_user')) {
 		   	redirect("login");
@@ -119,13 +119,13 @@ class Elecciones extends CI_controller
 	    
 	}
 
-	function eliminar_eleccion($id){
+	function eliminar_eleccion($id = null){
 		
 		$datos["mensaje"] = $this->Elecciones_model->elimina_eleccion($id);
 		redirect('elecciones/form_buscar');
 	}
 
-	function cerrar_eleccion($id){
+	function cerrar_eleccion($id = null){
 		
 		$datos["mensaje"] = $this->Elecciones_model->cierra_eleccion($id);
 		redirect('elecciones/form_buscar');
@@ -160,7 +160,7 @@ class Elecciones extends CI_controller
 
 	}
 
-	function form_ver($id){
+	function form_ver($id = null){
 
 		if (!$this->session->userdata('sess_id_user')) {
 		   	redirect("login");

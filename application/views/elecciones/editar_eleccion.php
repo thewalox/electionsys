@@ -4,7 +4,7 @@
 				<div class="miga-de-pan">
 					<ol class="breadcrumb">
 						<li><a href="<?php echo base_url(); ?>">Inicio</a></li>
-						<li><a href="#">Elecciones</a></li>
+						<li><a href="<?php echo base_url(); ?>elecciones/form_buscar/">Elecciones</a></li>
 						<li class="active">Editar Eleccion</li>
 					</ol>
 				</div>

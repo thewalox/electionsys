@@ -4,7 +4,7 @@
 				<div class="miga-de-pan">
 					<ol class="breadcrumb">
 						<li><a href="<?php echo base_url(); ?>">Inicio</a></li>
-						<li><a href="#">Estudiantes</a></li>
+						<li><a href="<?php echo base_url(); ?>estudiantes/form_buscar/">Estudiantes</a></li>
 						<li class="active">Editar Estudiante</li>
 					</ol>
 				</div>

@@ -86,7 +86,7 @@ class Estudiantes extends CI_controller
 		
 	}
 
-	function form_editar($id){
+	function form_editar($id = null){
 
 		if (!$this->session->userdata('sess_id_user')) {
 		   	redirect("login");
@@ -125,7 +125,7 @@ class Estudiantes extends CI_controller
 	    
 	}
 
-	function eliminar_estudiante($id){
+	function eliminar_estudiante($id = null){
 		
 		$datos["mensaje"] = $this->Estudiantes_model->elimina_estudiante($id);
 		redirect('estudiantes/form_buscar');

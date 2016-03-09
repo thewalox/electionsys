@@ -82,7 +82,7 @@ class Cursos extends CI_controller
 		
 	}
 
-	function form_editar($id){
+	function form_editar($id = null){
 
 		if (!$this->session->userdata('sess_id_user')) {
 		   	redirect("login");
@@ -117,7 +117,7 @@ class Cursos extends CI_controller
 	    
 	}
 
-	function eliminar_curso($id){
+	function eliminar_curso($id = null){
 		
 		$datos["mensaje"] = $this->Cursos_model->elimina_curso($id);
 		redirect('cursos/form_buscar');
@@ -153,7 +153,7 @@ class Cursos extends CI_controller
 
 	}
 
-	function form_ver($id){
+	function form_ver($id = null){
 
 		if (!$this->session->userdata('sess_id_user')) {
 		   	redirect("login");

@@ -27,31 +27,51 @@ class Candidatos extends CI_controller
 	}
 
 	function crear_candidato(){
-		
-		$this->form_validation->set_rules('codele', 'Codigo de Eleccion', 'required');
-		$this->form_validation->set_rules('codcan', 'Codigo de Candidato', 'required');
-		$this->form_validation->set_rules('codcur', 'Codigo de Curso', 'required');
-		$this->form_validation->set_rules('codcurul', 'Codigo de Curul', 'required');
-		$this->form_validation->set_rules('numelec', 'Numero Electoral', 'required');
-		
-		if (empty($_FILES['file']['name'])){
-    		$this->form_validation->set_rules('file', 'Foto', 'required');
-		}
 
-		$this->form_validation->set_message('required','El campo %s es obligatorio');
+		$config["upload_path"] = realpath(APPPATH."../assets/uploads");
+		$config["allowed_types"] = "gif|jpg|png";
+		$config["max_size"] = "1000";
 
-	    if($this->form_validation->run()!=false){
-	    	//Nombre de la foto
-			$nombreArchivo = $_FILES['file']['name'];
-	    	//convierte a binario
-	    	$imagenBinaria = addslashes(file_get_contents($_FILES['file']['tmp_name']));
+		$this->load->library("upload", $config);
 
-			$datos["mensaje"] = $this->Candidatos_model->add_candidato($this->input->post("codele"), $this->input->post("codcan"), $this->input->post("codcur"),$this->input->post("codcurul"), $this->input->post("numelec"), $imagenBinaria);
+		if (!$this->upload->do_upload('file')) {
+			
+			$datos["mensaje"] = $this->upload->display_errors();			
+
+			echo json_encode($datos);
 		}else{
-			$datos["mensaje"] = validation_errors(); //incorrecto
-		}
+		
+			$this->form_validation->set_rules('codele', 'Codigo de Eleccion', 'required');
+			$this->form_validation->set_rules('codcan', 'Codigo de Candidato', 'required');
+			$this->form_validation->set_rules('codcur', 'Codigo de Curso', 'required');
+			$this->form_validation->set_rules('codcurul', 'Codigo de Curul', 'required');
+			$this->form_validation->set_rules('numelec', 'Numero Electoral', 'required');
+			
+			if (empty($_FILES['file']['name'])){
+	    		$this->form_validation->set_rules('file', 'Foto', 'required');
+			}
 
-		echo json_encode($datos);
+			$this->form_validation->set_message('required','El campo %s es obligatorio');
+
+		    if($this->form_validation->run()!=false){
+		    	//elimino la foto cargada
+				unlink($config["upload_path"].'/'.$_FILES['file']['name']);
+
+		    	//Nombre de la foto
+				$nombreArchivo = $_FILES['file']['name'];
+
+		    	//convierte a binario
+		    	$imagenBinaria = addslashes(file_get_contents($_FILES['file']['tmp_name']));
+
+				$datos["mensaje"] = $this->Candidatos_model->add_candidato($this->input->post("codele"), $this->input->post("codcan"), $this->input->post("codcur"),$this->input->post("codcurul"), $this->input->post("numelec"), $imagenBinaria);
+			}else{
+				$datos["mensaje"] = validation_errors(); //incorrecto
+				//elimino la foto cargada
+				unlink($config["upload_path"].'/'.$_FILES['file']['name']);
+			}
+
+			echo json_encode($datos);
+		}
 		
 	}
 
@@ -63,8 +83,8 @@ class Candidatos extends CI_controller
 			$this->load->library('pagination');
 
 			/*Se personaliza la paginación para que se adapte a bootstrap*/
-			$config['base_url'] = base_url().'Candidatos/form_buscar/';
-			$config['total_rows'] = $this->Candidatos_model->get_total_Candidatos();
+			$config['base_url'] = base_url().'candidatos/form_buscar/';
+			$config['total_rows'] = $this->Candidatos_model->get_total_candidatos();
 			$config['per_page'] = 10;
 			$desde = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;
 		    $config['cur_tag_open'] = '<li class="active"><a href="#">';
@@ -82,66 +102,95 @@ class Candidatos extends CI_controller
 
 			$datos["titulo"] = " .: ElectionSys :.";
 
-			$datos["Candidatos"] = $this->Candidatos_model->get_Candidatos($config['per_page'], $desde);
+			$datos["candidatos"] = $this->Candidatos_model->get_candidatos($config['per_page'], $desde);
 
 			$this->pagination->initialize($config);
 
 		    $this->load->view("header", $datos);
-		    $this->load->view("Candidatos/buscar_Candidatos", $datos);
+		    $this->load->view("candidatos/buscar_candidatos", $datos);
 		    $this->load->view("footer", $datos);
 		    $this->load->view("fin", $datos);
 		}
 		
 	}
 
-	function form_editar($id){
+	function form_editar($ideleccion = null, $idcandidato = null){
 
 		if (!$this->session->userdata('sess_id_user')) {
 		   	redirect("login");
 		}else{
 			$datos["titulo"] = " .: ElectionSys :.";
 
-			$datos["estudiante"] = $this->Candidatos_model->get_estudiante_by_id($id);
+			$datos["candidato"] = $this->Candidatos_model->get_candidato_by_id($ideleccion, $idcandidato);
 			
 		    $this->load->view("header", $datos);
-		    $this->load->view("Candidatos/editar_estudiante", $datos);
+		    $this->load->view("candidatos/editar_candidato", $datos);
 		    $this->load->view("footer", $datos);
 		    $this->load->view("fin", $datos);
 		}
 		
 	}
 
-	function editar_estudiante(){
+	function editar_candidato(){
 
-		$this->form_validation->set_rules('nombre', 'Nombre', 'required');
-		$this->form_validation->set_rules('curso', 'Curso', 'required');
-		$this->form_validation->set_rules('estado', 'Estado', 'required|callback_check_default');
-		$this->form_validation->set_rules('sexo', 'Sexo', 'required|callback_check_default');
+		$config["upload_path"] = realpath(APPPATH."../assets/uploads");
+		$config["allowed_types"] = "gif|jpg|png";
+		$config["max_size"] = "1000";
 
-		$this->form_validation->set_message('required','El campo %s es obligatorio');
-		$this->form_validation->set_message('check_default','Seleccione un valor para el campo %s');
+		$this->load->library("upload", $config);
 
-	    if($this->form_validation->run()!=false){
-			$datos["mensaje"] = $this->Candidatos_model->edit_estudiante($this->input->post("codigo"), $this->input->post("nombre"), $this->input->post("curso"),$this->input->post("tel"), $this->input->post("estado"), $this->input->post("sexo"));
+		if (!$this->upload->do_upload('file') AND !empty($_FILES['file']['name']) ) {
+			
+			$datos["mensaje"] = $this->upload->display_errors();			
+
+			echo json_encode($datos);
 		}else{
-			$datos["mensaje"] = validation_errors(); //incorrecto
+			
+
+			$this->form_validation->set_rules('codcurul', 'Codigo de Curul', 'required');
+			$this->form_validation->set_rules('numelec', 'Numero Electoral', 'required');
+
+			$this->form_validation->set_message('required','El campo %s es obligatorio');
+
+		    if($this->form_validation->run()!=false){
+		    	
+		    	if (!empty($_FILES['file']['name'])){
+		    		//elimino la foto cargada
+					unlink($config["upload_path"].'/'.$_FILES['file']['name']);
+
+			    	//Nombre de la foto
+					$nombreArchivo = $_FILES['file']['name'];
+
+			    	//convierte a binario
+			    	$imagenBinaria = addslashes(file_get_contents($_FILES['file']['tmp_name']));
+		    	}else{
+		    		$imagenBinaria = "";
+		    	}
+
+				$datos["mensaje"] = $this->Candidatos_model->edit_candidato($this->input->post("codele"), $this->input->post("codcan"), $this->input->post("codcurul"), $this->input->post("numelec"), $imagenBinaria);
+			}else{
+				$datos["mensaje"] = validation_errors(); //incorrecto
+				//elimino la foto cargada
+				unlink($config["upload_path"].'/'.$_FILES['file']['name']);
+
+			}
+
+			echo json_encode($datos);
+
 		}
-
-		echo json_encode($datos);
-
-		//$this->form_editar($this->input->post("id"));	
 	    
 	}
 
-	function eliminar_estudiante($id){
+	function eliminar_candidato($ideleccion = null, $idcandidato = null){
 		
-		$datos["mensaje"] = $this->Candidatos_model->elimina_estudiante($id);
-		redirect('Candidatos/form_buscar');
+		$datos["mensaje"] = $this->Candidatos_model->elimina_candidato($ideleccion, $idcandidato);
+		redirect('candidatos/form_buscar');
 	}
 
-	function get_Candidatos_criterio(){
+	function get_candidatos_criterio(){
 
 		//se valida la variable get term para las busquedas que se realizan a traves de jquey UI
+		//header("Content-type: image/jpg");
 
 		if (isset($_GET['term'])) {
 			$filtro = $_GET['term'];
@@ -149,7 +198,7 @@ class Candidatos extends CI_controller
 			$filtro = $this->input->get("filtro");
 		}
 
-		$datos = $this->Candidatos_model->get_Candidatos_by_criterio($filtro);
+		$datos = $this->Candidatos_model->get_candidatos_by_criterio($filtro);
 
 		if (isset($_GET['term'])) {
 			
@@ -163,8 +212,15 @@ class Candidatos extends CI_controller
 			echo json_encode($row_set);
 
 		}else{
+
+			foreach ($datos as $dato) {
+				$candidatos[] = array('ideleccion' => $dato["ideleccion"], 'idcandidato' => $dato["idcandidato"],
+								'nombre_completo' => $dato["nombre_completo"], 'idcurso' => $dato["idcurso"],
+								'desc_curso' => $dato["desc_curso"], 'numero_electoral' => $dato["numero_electoral"],
+								'desc_curul' => $dato["desc_curul"], 'foto' => base64_encode($dato["foto"]));
+			}
 			
-			echo json_encode($datos);
+			echo json_encode($candidatos);
 		}
 
 	}
