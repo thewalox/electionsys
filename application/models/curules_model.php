@@ -93,4 +93,40 @@ class Curules_model extends CI_Model
 		
 	}
 
+	public function get_curules_by_eleccion($ideleccion){
+		$sql = "SELECT c.idcurul, c.desc_curul, 
+				CASE WHEN c.tipo_curul = 'G' THEN 'GLOBAL' ELSE 'PRIVADO' END AS tipo_curul, ec.idcurul AS asignacion
+				FROM curules c
+				LEFT JOIN elecciones_curules ec ON ec.idcurul = c.idcurul 
+				AND ec.ideleccion = ". $this->db->escape($ideleccion) ."
+				WHERE c.estado = 'A'";
+		
+		//echo($sql);
+		$res = $this->db->query($sql);
+		return $res->result_array();
+		
+	}
+
+	public function elimina_curules_elecciones($ideleccion){
+		$sql = "DELETE FROM elecciones_curules
+				WHERE ideleccion = ". $this->db->escape($ideleccion);
+		//echo $sql;			
+		if ($this->db->simple_query($sql)){
+        	return true;
+		}else{
+        	return false;
+		}
+		
+	}
+
+	public function add_curules_elecciones($codele, $curules){
+		
+		if ($this->db->insert_batch('elecciones_curules', $curules)){
+        	return true;
+		}else{
+        	return false;
+		}
+		
+	}
+
 }

@@ -80,6 +80,8 @@
 		                                <li class="menu-item "><a href="<?php echo base_url(); ?>curules/form_crear">Crear Curul</a></li>
 		                                <li role="separator" class="divider"></li>
 		                                <li class="menu-item "><a href="<?php echo base_url(); ?>curules/form_buscar">Editar Curules</a></li>
+		                                <li role="separator" class="divider"></li>
+		                                <li class="menu-item "><a href="<?php echo base_url(); ?>curules/form_asignar">Asignar Curules a Elecciones</a></li>
 		                            </ul>
 	                        	</li>
 	                        	<li role="separator" class="divider"></li>
@@ -107,8 +109,6 @@
 		                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Votantes</a>
 		                            <ul class="dropdown-menu">
 		                                <li class="menu-item "><a href="<?php echo base_url(); ?>votantes/form_crear">Crear Votantes</a></li>
-		                                <li role="separator" class="divider"></li>
-		                                <li class="menu-item "><a href="<?php echo base_url(); ?>votantes/form_buscar">Editar Votantes</a></li>
 		                            </ul>
 	                        	</li>
 				          	</ul>				

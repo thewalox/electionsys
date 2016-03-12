@@ -112,4 +112,17 @@ class Elecciones_model extends CI_Model
 		
 	}
 
+	public function get_elecciones_by_estado($estado){
+		$sql = "SELECT ideleccion, desc_eleccion
+				FROM elecciones
+				WHERE estado = ". $this->db->escape($estado) ."
+				ORDER BY ideleccion DESC ";
+
+		//echo $sql;
+
+		$res = $this->db->query($sql);
+		return $res->result_array();
+		
+	}
+
 }

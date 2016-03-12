@@ -8,6 +8,7 @@ class Curules extends CI_controller
 	{
 		parent::__construct();
 		$this->load->model('Curules_model');
+		$this->load->model('Elecciones_model');
 		$this->load->library('form_validation');
 	}
 
@@ -154,6 +155,68 @@ class Curules extends CI_controller
 			echo json_encode($datos);
 		}
 
+	}
+
+	function form_asignar($id = null){
+
+		if (!$this->session->userdata('sess_id_user')) {
+		   	redirect("login");
+		}else{
+			$datos["titulo"] = " .: ElectionSys :.";
+
+			$datos["elecciones"] = $this->Elecciones_model->get_elecciones_by_estado('A');
+			$datos["curul"] = $this->Curules_model->get_curul_by_id($id);
+			
+		    $this->load->view("header", $datos);
+		    $this->load->view("curules/asignar_curules_eleccion", $datos);
+		    $this->load->view("footer", $datos);
+		    $this->load->view("fin", $datos);
+		}
+		
+	}
+
+	function get_curules_eleccion(){
+
+		$this->form_validation->set_rules('eleccion', 'Eleccion', 'required|callback_check_default');
+
+		$this->form_validation->set_message('check_default','Seleccione un valor para el campo %s');
+
+	    if($this->form_validation->run()!=false){
+			$datos = $this->Curules_model->get_curules_by_eleccion($this->input->post("eleccion"));
+		}else{
+			$datos["error"] = validation_errors(); //incorrecto
+		}
+
+		echo json_encode($datos);
+	    
+	}
+
+	function asignar_curules_elecciones(){
+		$curules = $this->input->post("curules");
+		$curules = substr($curules, 0, -1);
+		$curules = explode(",", $curules);
+
+		foreach ($curules as $curul) {
+			if (!empty($curul)) {
+				$registros[] = array('ideleccion' => $this->input->post("eleccion"), 'idcurul' => trim($curul));
+			}
+		}
+
+		//print_r($registros);
+		$this->Curules_model->elimina_curules_elecciones($this->input->post("eleccion"));
+		
+		$this->form_validation->set_rules('eleccion', 'Eleccion', 'required|callback_check_default');
+
+		$this->form_validation->set_message('check_default','Seleccione un valor para el campo %s');
+
+		if($this->form_validation->run()!=false){
+			$datos["mensaje"] = $this->Curules_model->add_curules_elecciones($this->input->post("eleccion"), $registros);
+		}else{
+			$datos["mensaje"] = validation_errors(); //incorrecto
+		}
+			
+		echo json_encode($datos);
+		
 	}
 
 
