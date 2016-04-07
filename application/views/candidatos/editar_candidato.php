@@ -22,7 +22,7 @@
 					  		<div class="row">
 								<div class="form-group col-md-3">
 									<label for="desceleccion">Foto Candidato</label>
-									<output id="foto">
+									<output id="fotoini">
 										<img src="data:image/jpeg;base64,<?php echo base64_encode($candidato->foto); ?>" class="img-thumbnail">
 									</output>
 								</div>
@@ -69,26 +69,56 @@
 											<input type="text" placeholder="Numero Electoral" id="numelec" name="numelec" value="<?php echo $candidato->numero_electoral; ?>" class="form-control input-sm">
 										</div>
 									</div>
-									<div class="row">
-										<div class="form-group col-md-12">
-											<label for="foto">Cargar Foto</label>
-											<div class="fileinput fileinput-new input-group" data-provides="fileinput">
-							                	<div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
-							                	<span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new"><i class="glyphicon glyphicon-paperclip"></i> Seleccione Archivo</span><span class="fileinput-exists"><i class="glyphicon glyphicon-repeat"></i> Cambiar</span><input id="file" name="file" type="file" class="file-loading"></span>
-							                	<a href="#" id="upload-btn" class="input-group-addon btn btn-success fileinput-exists" data-loading-text="Importando..." autocomplete="off"><i class="glyphicon glyphicon-open"></i> Importar</a>
-						              		</div>
-										</div>
-									</div>
+									
 									<div class="row" align="center">
 										<div class="col-md-12">
 											<input type="button" name="aceptar" id="aceptar" value="Aceptar" class="btn btn-primary">
+											<input type="button" name="show" id="show" value="Modificar Foto" class="btn btn-warning">
 											<input type="button" name="cancelar" id="cancelar" value="Regresar" class="btn btn-success" onclick="javascript:location.href = '<?php echo base_url().'candidatos/form_buscar'; ?>';">
+											<input type="hidden" id="x" name="x" />
+											<input type="hidden" id="y" name="y" />
+											<input type="hidden" id="w" name="w" />
+											<input type="hidden" id="h" name="h" />
+											
 										</div>
 							  		</div>
 								</div>
 					  		</div>
 						</div>
 					</div>
+
+					<!-- Modal para capturar la foto-->
+				<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+					<div class="modal-dialog" role="document">
+				    	<div class="modal-content">
+				      		<div class="modal-header">
+				        		<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				        		<h4 class="modal-title" id="myModalLabel">Seleccione Foto del candidato</h4>
+				      		</div>
+				      		<div class="modal-body">
+				       			<div class="row">
+									<div class="form-group col-md-12">
+										<label for="foto">Cargar Foto</label>
+										<div class="fileinput fileinput-new input-group" data-provides="fileinput">
+								       	<div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
+									       	<span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new"><i class="glyphicon glyphicon-paperclip"></i> Seleccione Archivo</span><span class="fileinput-exists"><i class="glyphicon glyphicon-repeat"></i> Cambiar</span><input id="file" name="file" type="file" class="file-loading"></span>
+								           	<a href="#" id="upload-btn" class="input-group-addon btn btn-success fileinput-exists" data-loading-text="Importando..." autocomplete="off"><i class="glyphicon glyphicon-open"></i> Importar</a>
+							        	</div>
+									</div>
+									<div class="form-group col-md-12">
+										<output id="foto">
+											
+										</output>									
+									</div>
+								</div>
+				      		</div>
+				      <div class="modal-footer">
+				        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				      </div>
+				    </div>
+				  </div>
+				</div>
+
 				<?php
 					echo form_close();
 				}else{
@@ -121,8 +151,33 @@
                     reader.onload = (function(theFile) {
                         return function(e) {
                           // Insertamos la imagen
-                         document.getElementById("foto").innerHTML = ['<img class="img-thumbnail" src="', e.target.result,'" title="', escape(theFile.name), '"/>'].join('');
-                        };
+                         document.getElementById("foto").innerHTML = ['<img id="target" src="', e.target.result,'" title="', escape(theFile.name), '"/>'].join('');
+                         
+                         //el script de jcrop nos permite seleccionar la parte de la foto que queremos guardar
+                         
+						    $('#target').Jcrop({
+						    	aspectRatio: 1,
+						    	minSize: [ 300, 180 ],
+      							maxSize: [ 300, 180 ],
+      							boxWidth: 600,
+							    boxHeight: 400,
+      							onSelect: updateCoords
+						    });
+
+						    function updateCoords(c){
+								$('#x').val(c.x);
+							    $('#y').val(c.y);
+							    $('#w').val(c.w);
+							    $('#h').val(c.h);
+							};
+
+							function checkCoords(){
+							    if (parseInt($('#w').val())) return true;
+							    alert('Por favor seleccione el area de la foto a recortar');
+							    return false;
+							};
+
+                    	};
                     })(f);
              
                     reader.readAsDataURL(f);
@@ -140,6 +195,9 @@
 			   	}
 			});
 
+			$('#show').on('click',function(){
+				$('#myModal').modal('show');
+			});
 
 			$('#aceptar').on('click',function(){
 				var formData = new FormData(document.getElementById("form-candidatos"));

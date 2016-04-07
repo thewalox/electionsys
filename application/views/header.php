@@ -10,10 +10,12 @@
 	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/jasny-bootstrap.min.css" media="screen">
 	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/sub-menus.css" media="screen">
 	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/jquery-ui.css">
+	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/jquery.Jcrop.min.css">
 
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery.min.js"></script>
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/number-format.js"></script>
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery-ui.js"></script>
+	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery.Jcrop.min.js"></script>
 
 	<style>
 		.ui-autocomplete-loading {

@@ -118,4 +118,20 @@ class Candidatos_model extends CI_Model
 		
 	}
 
+	public function get_candidatos_by_eleccion($ideleccion){
+		$sql = "SELECT c.ideleccion, c.idcandidato, es.nombre_completo, c.idcurso, cu.desc_curso, 
+				c.numero_electoral, c.idcurul, cur.desc_curul, c.foto
+				FROM candidatos c
+				INNER JOIN elecciones e ON e.ideleccion = c.ideleccion
+				INNER JOIN estudiantes es ON es.idestudiante = c.idcandidato
+				INNER JOIN cursos cu ON cu.idcurso = c.idcurso
+				INNER JOIN curules cur ON cur.idcurul = c.idcurul
+				WHERE c.ideleccion = ". $this->db->escape($ideleccion);
+				//echo($sql);
+		$res = $this->db->query($sql);
+
+		return $res->result_array();
+		
+	}
+
 }

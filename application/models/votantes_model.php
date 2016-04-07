@@ -32,31 +32,6 @@ class Votantes_model extends CI_Model
 		
 	}
 
-	public function get_votantes($limit, $segmento){
-		$sql = "SELECT c.ideleccion, c.idcandidato, es.nombre_completo, c.idcurso, cu.desc_curso, 
-				c.numero_electoral, cur.desc_curul, c.foto
-				FROM Votantes c
-				INNER JOIN elecciones e ON e.ideleccion = c.ideleccion
-				INNER JOIN estudiantes es ON es.idestudiante = c.idcandidato
-				INNER JOIN cursos cu ON cu.idcurso = c.idcurso
-				INNER JOIN curules cur ON cur.idcurul = c.idcurul
-				ORDER BY c.ideleccion DESC, c.idcandidato ";
-
-		if($limit != 0){
-			$sql .= "LIMIT ". $segmento ." , ". $limit;
-		}
-
-		//echo $sql;
-
-		$res = $this->db->query($sql);
-		return $res->result_array();
-		
-	}
-
-	function get_total_votantes(){
-		$this->db->from('Votantes');
-		return $this->db->count_all_results();
-  	}
 
   	public function get_votantes_by_eleccion_curso($ideleccion, $idcurso){
   		
@@ -70,6 +45,21 @@ class Votantes_model extends CI_Model
 		//echo($sql);
 		$res = $this->db->query($sql);
 		return $res->result_array();
+		
+	}
+
+	public function get_votantes_by_eleccion_estudiante($ideleccion, $idestudiante){
+  		
+  		$sql = "SELECT e.idestudiante, e.nombre_completo, e.idcurso, v.idvotante
+				FROM estudiantes e
+				LEFT JOIN votantes v ON v.idvotante = e.idestudiante 
+				AND v.ideleccion = ". $this->db->escape($ideleccion) ."
+				WHERE e.estado = 'A' AND e.idestudiante = ". $this->db->escape($idestudiante) ."
+				ORDER BY e.nombre_completo";
+  				
+		//echo($sql);
+		$res = $this->db->query($sql);
+		return $res->row();
 		
 	}
 
@@ -90,6 +80,19 @@ class Votantes_model extends CI_Model
 		$res = $this->db->query($sql);
 
 		return $res->result_array();
+		
+	}
+
+	public function get_registro_voto($ideleccion, $idestudiante){
+  		
+  		$sql = "SELECT * 
+  				FROM registro_votos
+				WHERE ideleccion = ". $this->db->escape($ideleccion) ."
+				AND idvotante = ". $this->db->escape($idestudiante) ;
+  				
+		//echo($sql);
+		$res = $this->db->query($sql);
+		return $res->row();
 		
 	}
 

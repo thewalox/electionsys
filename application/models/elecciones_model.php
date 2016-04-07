@@ -80,7 +80,12 @@ class Elecciones_model extends CI_Model
 	}
 
 	function get_total_elecciones(){
-		$this->db->from('elecciones')->where('estado');
+		$this->db->from('elecciones')->where('estado !=','X');
+		return $this->db->count_all_results();
+  	}
+
+  	function get_total_elecciones_activas(){
+		$this->db->from('elecciones')->where('estado','A');
 		return $this->db->count_all_results();
   	}
 

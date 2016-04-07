@@ -9,6 +9,7 @@ class Candidatos extends CI_controller
 		parent::__construct();
 		$this->load->model('Candidatos_model');
 		$this->load->library('form_validation');
+		$this->load->helper('text');
 	}
 
 	function form_crear(){
@@ -40,34 +41,62 @@ class Candidatos extends CI_controller
 
 			echo json_encode($datos);
 		}else{
-		
-			$this->form_validation->set_rules('codele', 'Codigo de Eleccion', 'required');
-			$this->form_validation->set_rules('codcan', 'Codigo de Candidato', 'required');
-			$this->form_validation->set_rules('codcur', 'Codigo de Curso', 'required');
-			$this->form_validation->set_rules('codcurul', 'Codigo de Curul', 'required');
-			$this->form_validation->set_rules('numelec', 'Numero Electoral', 'required');
+
+			$upload_data = $this->upload->data();
+			//print_r($upload_data);
+
+			$this->load->library("image_lib");
+
+			$config2["source_image"] = $upload_data['full_path'];
+			$config2["new_image"] = $upload_data['full_path'];
+			$config2["width"] = $this->input->post("w");
+			$config2["height"] = $this->input->post("h");
+			$config2["x_axis"] = $this->input->post("x");
+			$config2["y_axis"] = $this->input->post("y");
+			$config2["maintain_ratio"] = FALSE;
+
+			$this->image_lib->clear();
+			$this->image_lib->initialize($config2);
+			//print_r($config2);
 			
-			if (empty($_FILES['file']['name'])){
-	    		$this->form_validation->set_rules('file', 'Foto', 'required');
-			}
 
-			$this->form_validation->set_message('required','El campo %s es obligatorio');
+			if (!$this->image_lib->crop()) {
+				$datos["mensaje"] = $this->image_lib->display_errors();
 
-		    if($this->form_validation->run()!=false){
-		    	//elimino la foto cargada
-				unlink($config["upload_path"].'/'.$_FILES['file']['name']);
-
-		    	//Nombre de la foto
-				$nombreArchivo = $_FILES['file']['name'];
-
-		    	//convierte a binario
-		    	$imagenBinaria = addslashes(file_get_contents($_FILES['file']['tmp_name']));
-
-				$datos["mensaje"] = $this->Candidatos_model->add_candidato($this->input->post("codele"), $this->input->post("codcan"), $this->input->post("codcur"),$this->input->post("codcurul"), $this->input->post("numelec"), $imagenBinaria);
-			}else{
-				$datos["mensaje"] = validation_errors(); //incorrecto
 				//elimino la foto cargada
-				unlink($config["upload_path"].'/'.$_FILES['file']['name']);
+				unlink($upload_data['full_path']);
+			}else{
+
+				$this->form_validation->set_rules('codele', 'Codigo de Eleccion', 'required');
+				$this->form_validation->set_rules('codcan', 'Codigo de Candidato', 'required');
+				$this->form_validation->set_rules('codcur', 'Codigo de Curso', 'required');
+				$this->form_validation->set_rules('codcurul', 'Codigo de Curul', 'required');
+				$this->form_validation->set_rules('numelec', 'Numero Electoral', 'required');
+				$this->form_validation->set_rules('w', 'Recorte de Foto', 'required');
+
+				if (empty($upload_data['file_name'])){
+			    	$this->form_validation->set_rules('file', 'Foto', 'required');
+				}
+
+				$this->form_validation->set_message('required','El campo %s es obligatorio');
+
+			    if($this->form_validation->run()!=false){
+
+			    	//convierte a binario
+			    	$imagenBinaria = addslashes(file_get_contents($upload_data['full_path']));
+
+					$datos["mensaje"] = $this->Candidatos_model->add_candidato($this->input->post("codele"), $this->input->post("codcan"), $this->input->post("codcur"),$this->input->post("codcurul"), $this->input->post("numelec"), $imagenBinaria);
+
+					//elimino la foto cargada
+					unlink($upload_data['full_path']);			    	
+
+				}else{
+					$datos["mensaje"] = validation_errors(); //incorrecto
+					
+					//elimino la foto cargada
+					unlink($upload_data['full_path']);			    	
+				}
+
 			}
 
 			echo json_encode($datos);
@@ -145,6 +174,23 @@ class Candidatos extends CI_controller
 
 			echo json_encode($datos);
 		}else{
+
+			$upload_data = $this->upload->data();
+			print_r($upload_data);
+
+			/*$this->load->library("image_lib");
+
+			$config2["source_image"] = $upload_data['full_path'];
+			$config2["new_image"] = $upload_data['full_path'];
+			$config2["width"] = $this->input->post("w");
+			$config2["height"] = $this->input->post("h");
+			$config2["x_axis"] = $this->input->post("x");
+			$config2["y_axis"] = $this->input->post("y");
+			$config2["maintain_ratio"] = FALSE;
+
+			$this->image_lib->clear();
+			$this->image_lib->initialize($config2);
+			//print_r($config2);
 			
 
 			$this->form_validation->set_rules('codcurul', 'Codigo de Curul', 'required');
@@ -173,7 +219,7 @@ class Candidatos extends CI_controller
 				//elimino la foto cargada
 				unlink($config["upload_path"].'/'.$_FILES['file']['name']);
 
-			}
+			}*/
 
 			echo json_encode($datos);
 
@@ -240,85 +286,8 @@ class Candidatos extends CI_controller
 		
 	}
 
-	public function importar(){
-		$config["upload_path"] = realpath(APPPATH."../assets/files");
-		$config["allowed_types"] = "xlsx";
-		$config["max_size"] = "0";
-
-		$this->load->library("upload", $config);
-
-		if (!$this->upload->do_upload('file')) {
-			
-			$datos["tipo"] = 0; //0 = error, 1= success
-			$datos["errores"] = $this->upload->display_errors();
-
-			echo json_encode($datos);
-		}else{
-			$data = array("upload_data" => $this->upload->data());
-
-			$this->load->library("PHPExcel");
-
-			$objPHPExcel = PHPExcel_IOFactory::load(APPPATH."../assets/files/".$data['upload_data']['file_name']);
-
-			unlink($config["upload_path"].'/'.$data['upload_data']['file_name']);
-
-			$cell_collection = $objPHPExcel->getActiveSheet()->getCellCollection();
-
-			//print_r($cell_collection);
-			$header = array();
-			$array_data = array();
-
-			foreach ($cell_collection as $cell) {
-				$column = $objPHPExcel->getActiveSheet()->getCell($cell)->getColumn(); //obtenemos las columnas
-				$row = $objPHPExcel->getActiveSheet()->getCell($cell)->getRow(); //obtenemos el numero de filas
-
-				$data_value = $objPHPExcel->getActiveSheet()->getCell($cell)->getValue();
-
-				if($row == 1){
-					$header[$row][$column] = $data_value;
-				}else{
-					$array_data[$row][$column] = $data_value;
-				}
-			}
-			//print_r($array_data);
-			//$datos["header"] = $header;
-			//$datos["values"] = $array_data;
-			$cont_add = 0;
-			$cont_edit = 0;
-
-			foreach ($array_data as $data) {
-
-				$estudiante = $this->Candidatos_model->get_estudiante_by_id($data["A"]);
-
-				//valido si la columna telefono viene vacia
-				if (!isset($data["D"])) {
-					$data["D"] = "";
-				}
-
-				if ($estudiante) {
-					$this->Candidatos_model->edit_estudiante($data["A"], $data["B"], $data["E"], $data["D"], $data["F"], $data["C"]);	
-					$cont_edit = $cont_edit + 1;
-				}else{
-					$this->Candidatos_model->add_estudiante($data["A"], $data["B"], $data["E"], $data["D"], $data["F"], $data["C"]);
-					$cont_add = $cont_add + 1;	
-				}
-
-				
-			}
-
-			$datos["add"] = $cont_add;
-			$datos["edit"] = $cont_edit;
-			
-			$datos["tipo"] = 1; //0 = error, 1= success
-
-			echo json_encode($datos);
-
-		}
-
-	}
-
 	function check_default($valor_post){
-		if($valor_post == '0'){ 
+		if($valor_post == ''){ 
       		return FALSE;
     	}else{
   			return TRUE;

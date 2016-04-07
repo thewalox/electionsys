@@ -9,9 +9,22 @@ class Votantes extends CI_controller
 		parent::__construct();
 		$this->load->model('Elecciones_model');
 		$this->load->model('Cursos_model');
-		$this->load->model('Estudiantes_model');
+		$this->load->model('Curules_model');
+		$this->load->model('Candidatos_model');
 		$this->load->model('Votantes_model');
 		$this->load->library('form_validation');
+	}
+
+	function index(){
+		$datos["titulo"] = " .: ElectionSys :.";
+		
+		if ($this->session->userdata('sess_id_votante')) {
+		   	redirect("votantes/tarjeton");
+		}else{
+			$this->load->view("votantes/login_votantes", $datos);	
+			//print_r($this->session->all_userdata());
+		} 
+	    
 	}
 
 	function form_crear(){
@@ -81,62 +94,6 @@ class Votantes extends CI_controller
 		
 	}
 
-	function form_buscar(){
-
-		if (!$this->session->userdata('sess_id_user')) {
-		   	redirect("login");
-		}else{
-			$this->load->library('pagination');
-
-			/*Se personaliza la paginación para que se adapte a bootstrap*/
-			$config['base_url'] = base_url().'Votantes/form_buscar/';
-			$config['total_rows'] = $this->Votantes_model->get_total_Votantes();
-			$config['per_page'] = 10;
-			$desde = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;
-		    $config['cur_tag_open'] = '<li class="active"><a href="#">';
-		    $config['cur_tag_close'] = '</a></li>';
-		    $config['num_tag_open'] = '<li>';
-		    $config['num_tag_close'] = '</li>';
-		    $config['last_link'] = FALSE;
-		    $config['first_link'] = FALSE;
-		    $config['next_link'] = '&raquo;';
-		    $config['next_tag_open'] = '<li>';
-		    $config['next_tag_close'] = '</li>';
-		    $config['prev_link'] = '&laquo;';
-		    $config['prev_tag_open'] = '<li>';
-		    $config['prev_tag_close'] = '</li>';
-
-			$datos["titulo"] = " .: ElectionSys :.";
-
-			$datos["Votantes"] = $this->Votantes_model->get_Votantes($config['per_page'], $desde);
-
-			$this->pagination->initialize($config);
-
-		    $this->load->view("header", $datos);
-		    $this->load->view("Votantes/buscar_Votantes", $datos);
-		    $this->load->view("footer", $datos);
-		    $this->load->view("fin", $datos);
-		}
-		
-	}
-
-	function form_editar($ideleccion = null, $idcandidato = null){
-
-		if (!$this->session->userdata('sess_id_user')) {
-		   	redirect("login");
-		}else{
-			$datos["titulo"] = " .: ElectionSys :.";
-
-			$datos["candidato"] = $this->Votantes_model->get_candidato_by_id($ideleccion, $idcandidato);
-			
-		    $this->load->view("header", $datos);
-		    $this->load->view("Votantes/editar_candidato", $datos);
-		    $this->load->view("footer", $datos);
-		    $this->load->view("fin", $datos);
-		}
-		
-	}
-
 	function editar_candidato(){
 
 		$config["upload_path"] = realpath(APPPATH."../assets/uploads");
@@ -187,49 +144,6 @@ class Votantes extends CI_controller
 	    
 	}
 
-	function eliminar_candidato($ideleccion = null, $idcandidato = null){
-		
-		$datos["mensaje"] = $this->Votantes_model->elimina_candidato($ideleccion, $idcandidato);
-		redirect('Votantes/form_buscar');
-	}
-
-	function get_Votantes_criterio(){
-
-		//se valida la variable get term para las busquedas que se realizan a traves de jquey UI
-		//header("Content-type: image/jpg");
-
-		if (isset($_GET['term'])) {
-			$filtro = $_GET['term'];
-		}else{
-			$filtro = $this->input->get("filtro");
-		}
-
-		$datos = $this->Votantes_model->get_Votantes_by_criterio($filtro);
-
-		if (isset($_GET['term'])) {
-			
-			foreach ($datos as $dato) {
-				$new_row['label']=htmlentities(stripslashes($dato['nombre']));
-				$new_row['value']=htmlentities(stripslashes($dato['idempleado']));
-				$new_row['dpto']=htmlentities(stripslashes($dato['desc_departamento']));
-				$row_set[] = $new_row; //build an array
-			}
-		
-			echo json_encode($row_set);
-
-		}else{
-
-			foreach ($datos as $dato) {
-				$Votantes[] = array('ideleccion' => $dato["ideleccion"], 'idcandidato' => $dato["idcandidato"],
-								'nombre_completo' => $dato["nombre_completo"], 'idcurso' => $dato["idcurso"],
-								'desc_curso' => $dato["desc_curso"], 'numero_electoral' => $dato["numero_electoral"],
-								'desc_curul' => $dato["desc_curul"], 'foto' => base64_encode($dato["foto"]));
-			}
-			
-			echo json_encode($Votantes);
-		}
-
-	}
 
 	function form_importar(){
 
@@ -321,6 +235,85 @@ class Votantes extends CI_controller
 
 		}
 
+	}
+
+	function validar_votante(){
+		if (isset($_POST["documento"])) {
+			//print_r($_POST);
+			$num = $this->Elecciones_model->get_total_elecciones_activas();
+
+			if ($num == 1) {
+				//correcto, solo debe haber una eleccion activa
+				
+				//busco la eleccion que esta activa
+				$eleccion = $this->Elecciones_model->get_elecciones_by_estado('A');
+				
+				foreach ($eleccion as $ele) {
+					$ideleccion = $ele["ideleccion"];
+					$desc_eleccion = $ele["desc_eleccion"];
+				}
+
+				$votante = $this->Votantes_model->get_votantes_by_eleccion_estudiante($ideleccion, $this->input->post("documento"));
+
+				//valido si el estudiante esta habilitado para esta jornada
+				if ($votante) {
+
+					//valido si el estudiante ya voto en la jornada
+					$voto = $this->Votantes_model->get_registro_voto($ideleccion, $this->input->post("documento"));
+
+					if ($voto) {
+						$datos["mensaje"] = "Lo sentimos, este documento ya fue participe de esta jornada electoral";
+					}else{
+						$sesiones = array();
+						$sesiones["sess_id_votante"] = $this->input->post("documento");
+						$sesiones["sess_eleccion"] = $ideleccion;
+						$this->session->set_userdata($sesiones);
+
+						$datos["mensaje"] = "ok";	
+					}
+					
+				}else{
+					$datos["mensaje"] = "Lo sentimos, este documento de identidad no esta habilitado para esta jornada electoral";
+				}
+
+				//print_r($votante);
+				
+			}elseif($num > 1){
+				//incorrecto, solo debe haber una eleccion activa
+				$datos["mensaje"] = "Existe mas de una jornada electoral activa. Por favor comuniquise inmediatamente con el coordinador de la jornada.";
+			}else{
+				//no existe eleccion activa
+				$datos["mensaje"] = "En este momento no existe ninguna jornada electoral activa. Si esto es incorrecto por favor comuniquise inmediatamente con el coordinador de la jornada.";
+			}
+
+			echo json_encode($datos);
+
+			/*if($res){
+				$sesiones = array();
+				$sesiones["sess_id_user"] = $res->login;
+				$sesiones["sess_name_user"] = $res->nombre_completo;
+				$sesiones["sess_perfil"] = $res->perfil;
+				$this->session->set_userdata($sesiones);
+				echo "ok";
+			}else{
+				echo "error";
+			}*/
+		}
+	}
+
+	function tarjeton(){
+		$datos["titulo"] = " .: ElectionSys :.";
+		
+		if (!$this->session->userdata('sess_id_votante')) {
+		   	redirect("votantes");	
+		}else{
+
+			$datos["curules"] = $this->Curules_model->get_curules_by_eleccion($this->session->userdata('sess_eleccion'));
+			$datos["candidatos"] = $this->Candidatos_model->get_candidatos_by_eleccion($this->session->userdata('sess_eleccion'));
+			$this->load->view("votantes/tarjeton", $datos);	
+			//print_r($this->session->all_userdata());
+		}
+		
 	}
 
 	function check_default($valor_post){
